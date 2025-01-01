@@ -9,7 +9,10 @@ int example_function1(int a, int b) {
 }
 
 int example_function2(int a, int b) {
-    return (a & b) + ((a ^ b) >> 2);
+    int and_part = a & b;
+    int xor_part = a ^ b;
+    int shifted_xor = xor_part >> 1;
+    return and_part + shifted_xor;
 }
 
 

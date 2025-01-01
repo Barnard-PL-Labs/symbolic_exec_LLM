@@ -16,13 +16,13 @@ client = OpenAI(api_key=api_key)
 model = "gpt-4o"
 
 # Function to make API calls for generating C code
-def generate_c_code(prompt):
+def generate_c_code(prompt, functions):
     try:
         response = client.chat.completions.create(
             model=model,
             messages=[
                 {"role": "system", "content": "You are an assistant that writes C code to solve given problems. Only return the code for the function, no other text. Do not include main or imports. Do not use floating point operations."},
-                {"role": "user", "content": prompt}
+                {"role": "user", "content": prompt + "\n\n Give a new implementation of that is semantically equivalent to the below functions: \n\n" + functions}
             ],
             max_tokens=1000,
             temperature=0.5,
@@ -127,7 +127,7 @@ def generate_and_run(prompt, c_file, bc_file, klee_output_dir):
     numOfGenerations = 3
     for i in range(1, numOfGenerations):
         print(f"Generating function {i}/10")
-        c_function = generate_c_code(prompt)
+        c_function = generate_c_code(prompt, functions)
         if c_function:
             function_name = f"example_function{i}"
             c_function = re.sub(r'\w+\s*\((.*?)\)\s*{', f'{function_name}(\\1) {{', c_function, count=1)
