@@ -1,5 +1,10 @@
 # symbolic_exec_LLM
 
+This is a project to generate C code using an LLM and check its equivalence with symbolic execution.
+
+Note: Floating point operations are not supported by KLEE, and so we kind of have to avoid them. Not ideal...
+
+
 ### Getting started
 
 Start the klee container
@@ -9,13 +14,12 @@ Start the klee container
 Install the python dependencies
 TODO: Add to dockerfile
 
-```pip install openai```
-```pip install python-dotenv```
+```pip install openai python-dotenv```
 
 ### To run automatically
 
 Run the python script to generate the C code and check equivalence with symbolic execution
-```python kleeGeneration.py```
+```python3 kleeGeneration.py```
 
 ### To run by hand
 

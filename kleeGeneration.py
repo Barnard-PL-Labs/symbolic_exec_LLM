@@ -21,7 +21,7 @@ def generate_c_code(prompt):
         response = client.chat.completions.create(
             model=model,
             messages=[
-                {"role": "system", "content": "You are an assistant that writes C code to solve given problems. Only return the code for the function, no other text. Do not include main or imports."},
+                {"role": "system", "content": "You are an assistant that writes C code to solve given problems. Only return the code for the function, no other text. Do not include main or imports. Do not use floating point operations."},
                 {"role": "user", "content": prompt}
             ],
             max_tokens=1000,
@@ -130,7 +130,7 @@ def generate_and_run(prompt, c_file, bc_file, klee_output_dir):
         c_function = generate_c_code(prompt)
         if c_function:
             function_name = f"example_function{i}"
-            c_function = re.sub(r'int \w+\(', f'int {function_name}(', c_function, count=1)
+            c_function = re.sub(r'\w+\s*\((.*?)\)\s*{', f'{function_name}(\\1) {{', c_function, count=1)
             functions += c_function + "\n\n"
             compare_code += f"    int result{i} = {function_name}(x, y);\n"
     compare_code += "    // Assertions to check equivalence\n"
@@ -149,7 +149,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Run KLEE symbolic execution with optional code generation')
     parser.add_argument('--skip-generation', action='store_true', 
                        help='Skip the code generation step and use existing C file')
-    parser.add_argument('--prompt', type=str, default="Write a function that computes the greatest common divisor of two integers.",
+    parser.add_argument('--prompt', type=str, default="Compute the bitwise average of two integers and return the result as an integer.",
                        help='Prompt for code generation')
     args = parser.parse_args()
 

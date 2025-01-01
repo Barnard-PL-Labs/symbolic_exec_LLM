@@ -5,21 +5,11 @@
 
 // Generated functions
 int example_function1(int a, int b) {
-    while (b != 0) {
-        int temp = b;
-        b = a % b;
-        a = temp;
-    }
-    return a;
+    return (a & b) + ((a ^ b) >> 1);
 }
 
 int example_function2(int a, int b) {
-    while (b != 0) {
-        int temp = b;
-        b = a % b;
-        a = temp;
-    }
-    return a;
+    return (a & b) + ((a ^ b) >> 2);
 }
 
 
