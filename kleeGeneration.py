@@ -2,9 +2,16 @@ import re
 from openai import OpenAI
 import subprocess
 import os
+from dotenv import load_dotenv
+import argparse
+
+# Load environment variables
+load_dotenv()
 
 # OpenAI API key setup
-api_key = ''
+api_key = os.getenv('OPENAI_API_KEY')
+if not api_key:
+    raise ValueError("OPENAI_API_KEY not found in environment variables")
 client = OpenAI(api_key=api_key)
 model = "gpt-4o"
 
@@ -14,13 +21,19 @@ def generate_c_code(prompt):
         response = client.chat.completions.create(
             model=model,
             messages=[
-                {"role": "system", "content": "You are an assistant that writes C code to solve given problems."},
+                {"role": "system", "content": "You are an assistant that writes C code to solve given problems. Only return the code for the function, no other text. Do not include main or imports."},
                 {"role": "user", "content": prompt}
             ],
             max_tokens=1000,
             temperature=0.5,
         )
-        return response.choices[0].message.content
+        # Remove markdown code block formatting if present
+        content = response.choices[0].message.content
+        content = content.strip()
+        content = content.removeprefix('```c')
+        content = content.removeprefix('```')
+        content = content.removesuffix('```')
+        return content.strip()
     except Exception as e:
         print(f"Error generating code for prompt: {prompt[:30]}... - {e}")
         return None
@@ -132,9 +145,22 @@ def generate_and_run(prompt, c_file, bc_file, klee_output_dir):
 
 # Main flow
 if __name__ == "__main__":
-    prompt = "Write a function that computes the greatest common divisor of two integers."
+    # Add argument parser
+    parser = argparse.ArgumentParser(description='Run KLEE symbolic execution with optional code generation')
+    parser.add_argument('--skip-generation', action='store_true', 
+                       help='Skip the code generation step and use existing C file')
+    parser.add_argument('--prompt', type=str, default="Write a function that computes the greatest common divisor of two integers.",
+                       help='Prompt for code generation')
+    args = parser.parse_args()
+
     c_file = "symbolic_execution.c"
     bc_file = "symbolic_execution.bc"
     klee_output_dir = "klee-last"
 
-    generate_and_run(prompt, c_file, bc_file, klee_output_dir)
+    if args.skip_generation:
+        print("Skipping generation step, using existing C file...")
+        compile_program(c_file, bc_file)
+        run_klee(bc_file)
+        extract_klee_results(klee_output_dir)
+    else:
+        generate_and_run(args.prompt, c_file, bc_file, klee_output_dir)

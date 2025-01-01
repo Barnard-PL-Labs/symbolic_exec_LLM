@@ -3,20 +3,33 @@
 #include <stdio.h>
 #include <assert.h>
 
-// Example functions
-int example_function1(int x, int y) {
-    return (x / 2) + (y / 2) + ((x % 2 + y % 2) / 2);
+// Generated functions
+int example_function1(int a, int b) {
+    while (b != 0) {
+        int temp = b;
+        b = a % b;
+        a = temp;
+    }
+    return a;
 }
 
-int example_function2(int x, int y) {
-    return (int)((x + y) / 2.0);
+int example_function2(int a, int b) {
+    while (b != 0) {
+        int temp = b;
+        b = a % b;
+        a = temp;
+    }
+    return a;
 }
+
+
 
 // Comparison function
 int compareFunction(int x, int y) {
     int result1 = example_function1(x, y);
     int result2 = example_function2(x, y);
-    klee_assert(result1 == result2); // Assertion to check equivalence
+    // Assertions to check equivalence
+    klee_assert(result1 == result2);
     return 1;
 }
 
